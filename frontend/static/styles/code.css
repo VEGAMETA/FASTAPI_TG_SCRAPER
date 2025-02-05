@@ -1,0 +1,6 @@
+.code-field {
+    display: flex;
+    gap: 1.5rem;
+    margin-right: 1rem;
+    align-items: baseline;
+}

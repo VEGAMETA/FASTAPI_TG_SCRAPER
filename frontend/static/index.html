@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="tag, tag, tag">
+    <link rel="icon" type="image/x-icon" href="static/res/logo.ico">
+    <meta name="author" content="VEGAMETA">
+
+    <title>TG Messages Scrapper Bot.</title>
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.0.2/sha.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
+    <script src="../static/index.js" defer></script>
+
+</head>
+<body class="responsive">
+    <div class="dialog-code">
+        <div class="overlay"></div>
+        <dialog class="modal" id="dialog-modal">
+            <h5>Помощь: Что делает этот бот?</h5>
+            <div>
+                <p>
+                    Этот бот предназначен для сбора данных о пользователях и их сообщениях из указанных чатов Telegram. 
+                    На основе собранной информации бот формирует результаты и предоставляет их в удобном формате.
+                    <a href="https://my.telegram.org/auth?to=apps" class="inverse-surface">&nbsp;Получить api_id и api_hash&nbsp;</a>
+                </p>
+                <b>Для работы бота необходимо:</b>
+                <ol>
+                    <li>
+                        <b>Заполнить следующие поля:</b>
+                        <ul>
+                            <li>API ID: Уникальный идентификатор вашего приложения Telegram.</li> 
+                            <li>API Hash: Секретный ключ для взаимодействия с Telegram API.</li>
+                            <li>Username: Ваше имя пользователя в Telegram.</li>
+                            <li>Phone Number: Номер телефона, связанный с вашей учетной записью.</li>
+                            <li>Proxy Format: Прокси в формате IP:PORT@USERNAME:PASSWORD.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <b>Авторизация:</b>
+                        <ul>
+                            <li>После ввода вышеуказанных данных дождаться и ввести Code, отправленный Telegram на ваш номер телефона.</li>
+                            <li>ИЛИ Вместо заполнения вышеперечисленных полей можно загрузить готовые файлы TData, если они уже есть.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <b>Настройки:</b>
+                        <ul>
+                            <li>Указать ключевые слова, которые бот будет использовать для поиска сообщений.</li>
+                            <li>Указать чаты, из которых бот будет собирать данные.</li>
+                            <li>Задать прокси, если необходимо, в формате IP:PORT@USERNAME:PASSWORD.</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <b>Итог:</b>
+                        <ul>
+                            <li>После выполнения настроек и авторизации бот начнет поиск и сбор данных по указанным параметрам. Результаты можно будет скачать в </li>
+                        </ul>
+                    </li>
+                </ol>
+                Если у вас возникли вопросы, обратитесь к разработчику.</div>
+            <nav class="right-align no-space">
+                <button class="transparent link" data-ui="#dialog-modal" onclick="closeHelp()">Ok.</button>
+            </nav>
+        </dialog>
+        <dialog class="modal" id="dialog-invite">
+            <h5>Invite Token.</h5>
+            <div id="invite_token">
+            </div>
+            <nav class="right-align no-space">
+                <button class="transparent link" data-ui="#dialog-invite" onclick="closeInvite()">Ok.</button>
+            </nav>
+        </dialog>
+    </div>
+    <div class="login-page extra" style="display: none;">
+        <br>
+        <h1><b>Login.</b></h1>
+        <br>
+        <div class="field border label">
+            <input class="form-field" type="text" id="scrambt_username" placeholder="">
+            <label>username</label>
+        </div>
+        <div class="field border label">
+            <input class="form-field" type="password" id="scrambt_password" placeholder="">
+            <label>password</label>
+        </div>
+        <button onclick="login()">Log In.</button>
+        <br>
+        <br>
+        <br>
+        <div class="field border label">
+            <input class="form-field" type="text" id="scrambt_token" placeholder="">
+            <label>token</label>
+        </div>
+        <button onclick="signup()">Sing Up.</button>
+        
+    </div>
+    <div class="main-page" style="display: none;">  
+        <div class="header">
+            <h1><b>ScraMBT.</b></h1>
+            <div>
+                <button data-ui="#dialog-invite" class="transparent circle header-button" onclick="openInvite()"><i>group_add</i></button>
+                <button class="transparent circle header-button moon" onclick="changeTheme()" id="change_theme"><i>light_mode</i></button>
+                <button data-ui="#dialog-modal" class="transparent circle header-button" onclick="openHelp()"><i>help</i></button>
+                <button class="transparent circle header-button" onclick="logout()"><i>logout</i></button>
+            </div>
+        </div>
+        <div class="columns">
+            <div class="item">
+                <fieldset>
+                    <legend>Bot Settings.</legend>
+                    <div class="field border label">
+                        <div class="row">
+                            <button class="circle transparent" id="delete-bot" onclick="deleteBot()"><i class="extra">delete</i></button>
+                            <div class="field border label max">
+                                <select id="bot_select" onload="changeBot()" required>
+                                </select>
+                                <label>Select Bot.</label>
+                            </div>
+                            <button class="circle" onclick="addBot()"><i>add</i></button>
+                        </div>
+                    </div>
+                    <div id="bot-data"> </div>
+
+                    <div class="page padding" data-ui="bot_template" id="bot_template">
+                        
+                        <div class="row">
+                            <div>
+                                <i class="primary circle">brightness_empty</i>
+                                <div class="tooltip bottom">This Field Is Essential.</div>
+                            </div>
+                            <div class="field suffix border">
+                                <select id="proxy_type">
+                                    <option value="http">HTTP.</option>
+                                    <option value="socks4">SOCKS4.</option>
+                                    <option value="socks5">SOCKS5.</option>
+                                </select>
+                                <i>arrow_drop_down</i>
+                            </div>
+                            <div class="field border label suffix max" id="proxy_field">
+                                <input class="form-field" type="text" id="proxy" placeholder="">
+                                <label>Proxy.</label>
+                                <div class="tooltip bottom">IP:PORT@USERNAME:PASSWORD</div>
+                            </div>
+                            <button onclick="checkProxy()">Check Proxy.</button>
+                        </div>
+                        <div class="row">
+                            <div>
+                                <i class="primary circle">brightness_empty</i>
+                                <div class="tooltip bottom">This Field Is Essential.</div>
+                            </div>
+                            <div class="field border label max">
+                                <input class="form-field" type="text" id="username" placeholder="">
+                                <label>Username.</label>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="field border label max">
+                                <input class="form-field" type="text" id="api_id" placeholder="">
+                                <label>api_id</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="field border label max">
+                                <input class="form-field" type="text" id="api_hash" placeholder="">
+                                <label>api_hash</label>
+                            </div>
+                        </div>
+                        
+
+                        <div class="row">
+                            <div class="field border label max">
+                                <input class="form-field" type="text" id="phone-number" placeholder="">
+                                <label>Phone Number.</label>
+                            </div>
+                        </div>
+                        <br>
+                        <div class="upload_tdata">
+                            <div class="upload_tdata">
+                                <div class="field border label">
+                                    <input class="" type="text" id="code" placeholder="">
+                                    <label>Code.</label>
+                                </div>
+                                <button class="send_button" onclick="sendCode()">
+                                    Send.
+                                    <div class="tooltip bottom">
+                                        DO NOT SEND THE CODE
+                                        <br>
+                                        IF YOU DON'T TRUST THIS HOST!
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="extra">
+                                <button class="chip" id="bot_auth_status">
+                                    <i class=" circle error" id="bot_auth_status_icon">close</i>
+                                    <span id="bot_auth_status_text">N/a.</span>
+                                </div>
+                            </button>
+                            <div class=" upload_tdata"> 
+                                <div class="field label suffix border">
+                                    <input type="file" id="tdata-file">
+                                    <input type="text" placeholder=" " readonly="">
+                                    <label>TData Archive.</label>
+                                    <i>attach_file</i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+
+            <div class="item">
+                <fieldset>
+                    <legend>Parser Settings.</legend>
+                    <div class="upload-field">
+                        <div class="field textarea label border upload-field">
+                            <textarea type="text" id="keywords" placeholder=""></textarea>
+                            <label>Keywords.</label>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="upload-field">
+                        <div class="field textarea label border upload-field">
+                            <textarea type="text" id="chats" placeholder=""></textarea>
+                            <label>Chats.</label>
+                        </div>
+                    </div>
+                    <div class="max"></div>
+                    <br>
+                    <div class="upload_tdata">
+                        <div class="">
+                            <div class="field label suffix border">
+                                <input type="file" id="keywords_file">
+                                <input  type="text" placeholder=" " readonly="">
+                                <label class="">Keywords File.</label>
+                                <i>attach_file</i>
+                            </div>
+                        </div>
+                        <div class=""></div>
+                        <div class="">
+                            <div class="field label suffix border">
+                                <input type="file" id="chats_file">
+                                <input  type="text" placeholder=" " readonly="">
+                                <label class="">Chats File.</label>
+                                <i>attach_file</i>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="row">
+            <button class="start-button" onclick="authorizeBotSession()">Authorize Bot Session.</button>
+            <button class="start-button" onclick="start()">StartBot.</button>
+        </div>
+    </div>
+
+</body>
+</html>

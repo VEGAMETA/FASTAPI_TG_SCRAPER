@@ -1,0 +1,47 @@
+.header {
+    display: flex;
+    margin: 1em;
+}
+
+.header-button {
+    size: 3rem;
+}
+
+.main-page {
+    display: block;
+}
+
+.start-button {
+    display: block;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    height: 3rem;
+    font-size: large;
+    width: calc(50% - 7rem);
+    border-radius: 50px;
+}
+
+.upload-field{
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    height: 10rem;
+}
+
+.upload-button {
+    display: flex;
+    flex-wrap: nowrap;
+    height: 100%;
+}
+
+.upload_tdata {
+    display: flex;
+    align-items: baseline;
+    text-align: center;
+    padding-bottom: 0%;
+    gap: 1rem;
+}
+
+.send_button {
+    margin-left: 1rem;
+}

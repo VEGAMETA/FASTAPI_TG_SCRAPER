@@ -1,0 +1,23 @@
+.login-page {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    place-items: center;
+    align-items: center;
+    align-content: center;
+    text-align: center;
+}
+
+.login-form {
+    display: flex;
+    max-width: fit-content;
+    place-items: baseline;
+    gap: 15px;
+}
+
+.logout-button {
+    background:url(../res/logout.png) no-repeat;
+    background-size: contain;
+    background-position: center;
+    border-radius: 100%;
+}

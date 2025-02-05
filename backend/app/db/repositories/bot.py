@@ -1,0 +1,27 @@
+from typing import Optional, Any
+from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import UUID, delete, select
+
+from ..base_repository import BaseRepository
+from ..models.bot import Bot
+from ..models.session import Session
+from ..models.user import User
+
+
+class BotRepository(BaseRepository[Bot]):
+    async def get_by_uuid(self, db: AsyncSession, uuid: UUID) -> Optional[Bot]:
+        result = await db.execute(select(self.model).where(self.model.uuid == uuid))
+        return result.scalars().first()
+    
+    async def get_all_by_session_uuid(self, db: AsyncSession, uuid: UUID) -> Optional[Bot]:
+        result = await db.execute(select(self.model).where(self.model.sessions.contains(uuid)))
+        return result.scalars().all()
+    
+    async def get_by_username(self, db: AsyncSession, username: str) -> Optional[Bot]:
+        result = await db.execute(select(self.model).where(self.model.username == username))
+        return result.scalars().first()
+
+    async def delete_bot_by_username(self, db: AsyncSession, username: str) -> None:
+        await db.execute(delete(self.model).where(self.model.username == username))
+        await db.commit()

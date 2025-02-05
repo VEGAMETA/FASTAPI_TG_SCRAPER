@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                                  
+    "module": "none",
+    "outFile": "frontend/static/index.js",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noEmitOnError": true,
+    "skipLibCheck": true
+  },
+  "include": ["frontend/**/*.ts"]
+}
