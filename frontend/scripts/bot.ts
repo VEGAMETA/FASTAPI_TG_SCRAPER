@@ -1,12 +1,30 @@
-type Nullable<T> = T | null;
+function checkAll(): void {
+    const botChecks: NodeListOf<HTMLInputElement> = document.querySelectorAll('[data-ui="bot-check"]');
+    let uncheck = true;
+    for (const botCheck of botChecks) if (!botCheck.checked) uncheck = false; 
+    for (const botCheck of botChecks) botCheck.checked = !uncheck;
+} 
 
-function changeBot(this: HTMLSelectElement): void {
-    alert(`${this.value}`);
+function addCheckBot(username: string): void {
+    if (!username) return;
+    const possibleBot: Nullable<HTMLElement> = document.querySelector(`#bot-${username}`);
+    if (possibleBot) return;
+
+    const botTemplate: Nullable<HTMLElement> = document.querySelector("#bot-check-template");
+    const botData: Nullable<HTMLElement> = document.querySelector("#bot-check-data");
+
+    if (!botTemplate || !botData) return;
+
+    const newBotData: HTMLElement = botTemplate.cloneNode(true) as HTMLElement;
+    newBotData.id = `bot-${username}`;
+    newBotData.classList.remove("page");
+    newBotData.children[0].children[1].textContent = username;
+    botData.appendChild(newBotData);
 }
 
 function addBot(): void {
-    const botSelector: Nullable<HTMLSelectElement> = document.querySelector("#bot_select");
-    const botTemplate: Nullable<HTMLElement> = document.querySelector("#bot_template");
+    const botSelector: Nullable<HTMLSelectElement> = document.querySelector("#bot-select");
+    const botTemplate: Nullable<HTMLElement> = document.querySelector("#bot-template");
     const botData: Nullable<HTMLElement> = document.querySelector("#bot-data");
     const deleteBotButton: Nullable<HTMLButtonElement> = document.querySelector("#delete-bot");
 
@@ -26,9 +44,7 @@ function addBot(): void {
     newBotData.classList.add("active");
     botData.appendChild(newBotData);
     
-    if (botSelector.children.length > 1 && botSelector.value === newBot.value) {
-        deleteBotButton.classList.remove("transparent");
-    }
+    if (botSelector.children.length > 1 && botSelector.value === newBot.value) deleteBotButton.classList.remove("transparent");
 }
 
 function deleteBot(): void {
@@ -47,23 +63,12 @@ function deleteBot(): void {
         document.querySelector(`#${newLastBotOption.value}`)?.classList.add("active");
         newLastBotOption.selected = true;
 
-        if (botSelector.children.length > 1) {
-            deleteBotButton.classList.remove("transparent");
-        } else {
-            deleteBotButton.classList.add("transparent");
-        }
+        botSelector.children.length > 1 ? deleteBotButton.classList.remove("transparent") : deleteBotButton.classList.add("transparent");
     }
 }
 
-
-//<!-- 
-// <progress class="circle"></progress>
-// <i>check</i>
-// <i>close</i> 
-// -->
-
 function processing(): void {
-    const status = document.getElementById("bot_auth_status");
+    const status = getBotEntryElement("#bot-auth-status");
     if (!status) return;
     status.innerHTML = '';
     
@@ -74,7 +79,7 @@ function processing(): void {
 }
 
 function bad_bot(): void {
-    const status = document.getElementById("bot_auth_status");
+    const status = getBotEntryElement("#bot-auth-status");
     if (!status) return;
     status.innerHTML = '';
     
@@ -87,11 +92,10 @@ function bad_bot(): void {
     const text = document.createElement("span");
     text.textContent = "N/a.";
     status?.append(text);
-
 }
 
-function good_bot(): void {
-    const status = document.getElementById("bot_auth_status");
+function good_bot(username: string): void {
+    const status = getBotEntryElement("#bot-auth-status");
     if (!status) return;
     status.innerHTML = '';
     
@@ -103,68 +107,15 @@ function good_bot(): void {
     const text = document.createElement("span");
     text.textContent = "Ok.";
     status?.append(text);
+    addCheckBot(username);
 }
-
-
-
-async function requestCode(): Promise<void> {
+function startBots(): void {
     return;
 }
 
-async function manageTdata(tdata_archive: File, username: string, proxy: string): Promise<void> {
-    const formData = new FormData();
-    formData.append("tdata_archive_file", tdata_archive); 
-    formData.append("username",username);
-    const proxyData = getProxy();
-    if (!proxyData) return bad_bot();
-    formData.append("proxy_scheme",proxyData.scheme);
-    formData.append("proxy_hostname", proxyData.hostname);
-    formData.append("proxy_port", proxyData.port);
-    formData.append("proxy_username", proxyData.username);
-    formData.append("proxy_password", proxyData.password);
-    const response = await fetch("/api/v1/bot/create/tdata", {
-        method: "POST",
-        body: formData,
-    });
-    if (!response.ok) {
-        const errorData = await response.json();
-        const errorDetail = errorData.detail || errorData.message || "Неизвестная ошибка";
-        alert(`Ошибка при загрузке Tdata! ${errorDetail}`);
-        return bad_bot();
-    }
-    good_bot();
-}
 
-async function manageBotEntries(username: string, proxy: string): Promise<void> {
-    const ws = new WebSocket(`${window.location.origin.replace(/^http/, "ws")}/api/v1/bot/create/credentials`);
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log(data.message); // "Enter the code"
-
-        if (data.message === "Enter the code") {
-            const code: string = prompt("Введите код:") as string;
-            ws.send(code);
-        } else {
-            console.log("Ответ от сервера:", data);
-        }
-    };
-}
-
-async function authorizeBotSession(): Promise<void> {
-    processing()
-    const usernameInput = document.getElementById("username") as HTMLInputElement;
-    if (!usernameInput) {bad_bot(); return alert("Username input not found!");}
-    if (!usernameInput.value) {bad_bot(); return alert("Username is empty!");}
-
-    const proxyInput = document.getElementById("proxy") as HTMLInputElement;
-    if (!proxyInput) {bad_bot(); return alert("Proxy input not found!");}
-    if (!proxyInput.value) {bad_bot(); return alert("Proxy is empty!");}
-
-    const tdataInput = document.getElementById("tdata-file") as HTMLInputElement;
-    if (tdataInput && tdataInput.files && tdataInput.files.length) return await manageTdata(tdataInput.files[0], usernameInput.value, proxyInput.value);
-    else return await manageBotEntries(usernameInput.value, proxyInput.value);
-}
-
-function startBot(): void {
-    return;
-}
+//<!-- 
+// <progress class="circle"></progress>
+// <i>check</i>
+// <i>close</i> 
+// -->

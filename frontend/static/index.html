@@ -26,7 +26,7 @@
                 <p>
                     Этот бот предназначен для сбора данных о пользователях и их сообщениях из указанных чатов Telegram. 
                     На основе собранной информации бот формирует результаты и предоставляет их в удобном формате.
-                    <a href="https://my.telegram.org/auth?to=apps" class="inverse-surface">&nbsp;Получить api_id и api_hash&nbsp;</a>
+                    <a href="https://my.telegram.org/auth?to=apps" class="inverse-surface" target="_blank">&nbsp;Получить api_id и api_hash&nbsp;</a>
                 </p>
                 <b>Для работы бота необходимо:</b>
                 <ol>
@@ -41,7 +41,7 @@
                         </ul>
                     </li>
                     <li>
-                        <b>Авторизация:</b>
+                        <b>Авторизация бота:</b>
                         <ul>
                             <li>После ввода вышеуказанных данных дождаться и ввести Code, отправленный Telegram на ваш номер телефона.</li>
                             <li>ИЛИ Вместо заполнения вышеперечисленных полей можно загрузить готовые файлы TData, если они уже есть.</li>
@@ -52,14 +52,11 @@
                         <ul>
                             <li>Указать ключевые слова, которые бот будет использовать для поиска сообщений.</li>
                             <li>Указать чаты, из которых бот будет собирать данные.</li>
-                            <li>Задать прокси, если необходимо, в формате IP:PORT@USERNAME:PASSWORD.</li>
+                            <li>Выбрать ботов для поиска.</li>
                         </ul>
                     </li>
                     <li>
-                        <b>Итог:</b>
-                        <ul>
-                            <li>После выполнения настроек и авторизации бот начнет поиск и сбор данных по указанным параметрам. Результаты можно будет скачать в </li>
-                        </ul>
+                        После выполнения настроек и авторизации бот начнет поиск и сбор данных по указанным параметрам. Результаты можно будет скачать в </li>
                     </li>
                 </ol>
                 Если у вас возникли вопросы, обратитесь к разработчику.</div>
@@ -109,15 +106,16 @@
                 <button class="transparent circle header-button" onclick="logout()"><i>logout</i></button>
             </div>
         </div>
-        <div class="columns">
-            <div class="item">
+        <br>
+        <div class="grid large-space">
+            <div class="s6">
                 <fieldset>
-                    <legend>Bot Settings.</legend>
+                    <legend>Bots.</legend>
                     <div class="field border label">
                         <div class="row">
                             <button class="circle transparent" id="delete-bot" onclick="deleteBot()"><i class="extra">delete</i></button>
                             <div class="field border label max">
-                                <select id="bot_select" onload="changeBot()" required>
+                                <select id="bot-select" onload="changeBot()" required>
                                 </select>
                                 <label>Select Bot.</label>
                             </div>
@@ -126,22 +124,22 @@
                     </div>
                     <div id="bot-data"> </div>
 
-                    <div class="page padding" data-ui="bot_template" id="bot_template">
+                    <div class="page padding" data-ui="bot-template" id="bot-template">
                         
                         <div class="row">
-                            <div>
-                                <i class="primary circle">brightness_empty</i>
+                            <button class="circle transparent">
+                                <i class="circle">brightness_empty</i>
                                 <div class="tooltip bottom">This Field Is Essential.</div>
-                            </div>
+                            </button>
                             <div class="field suffix border">
-                                <select id="proxy_type">
+                                <select id="proxy-type">
                                     <option value="http">HTTP.</option>
                                     <option value="socks4">SOCKS4.</option>
                                     <option value="socks5">SOCKS5.</option>
                                 </select>
                                 <i>arrow_drop_down</i>
                             </div>
-                            <div class="field border label suffix max" id="proxy_field">
+                            <div class="field border label suffix max" id="proxy-field">
                                 <input class="form-field" type="text" id="proxy" placeholder="">
                                 <label>Proxy.</label>
                                 <div class="tooltip bottom">IP:PORT@USERNAME:PASSWORD</div>
@@ -149,10 +147,10 @@
                             <button onclick="checkProxy()">Check Proxy.</button>
                         </div>
                         <div class="row">
-                            <div>
-                                <i class="primary circle">brightness_empty</i>
+                            <button class="circle transparent">
+                                <i class="circle">brightness_empty</i>
                                 <div class="tooltip bottom">This Field Is Essential.</div>
-                            </div>
+                            </button>
                             <div class="field border label max">
                                 <input class="form-field" type="text" id="username" placeholder="">
                                 <label>Username.</label>
@@ -161,13 +159,13 @@
                         
                         <div class="row">
                             <div class="field border label max">
-                                <input class="form-field" type="text" id="api_id" placeholder="">
+                                <input class="form-field" type="text" id="api-id" placeholder="">
                                 <label>api_id</label>
                             </div>
                         </div>
                         <div class="row">
                             <div class="field border label max">
-                                <input class="form-field" type="text" id="api_hash" placeholder="">
+                                <input class="form-field" type="text" id="api-hash" placeholder="">
                                 <label>api_hash</label>
                             </div>
                         </div>
@@ -196,9 +194,9 @@
                                 </button>
                             </div>
                             <div class="extra">
-                                <button class="chip" id="bot_auth_status">
-                                    <i class=" circle error" id="bot_auth_status_icon">close</i>
-                                    <span id="bot_auth_status_text">N/a.</span>
+                                <button class="chip" id="bot-auth-status">
+                                    <i class=" circle error" id="bot-auth-status-icon">close</i>
+                                    <span id="bot-auth-status-text">N/a.</span>
                                 </div>
                             </button>
                             <div class=" upload_tdata"> 
@@ -210,14 +208,17 @@
                                 </div>
                             </div>
                         </div>
+                        <nav class="max">
+                            <button class="responsive" onclick="authorizeBotSession()">Authorize Bot Session.</button>
+                        </nav>
                     </div>
                 </fieldset>
             </div>
 
 
-            <div class="item">
+            <div class="s6">
                 <fieldset>
-                    <legend>Parser Settings.</legend>
+                    <legend>Settings.</legend>
                     <div class="upload-field">
                         <div class="field textarea label border upload-field">
                             <textarea type="text" id="keywords" placeholder=""></textarea>
@@ -253,12 +254,36 @@
                         </div>
                     </div>
                 </fieldset>
+                <div class="row scroll" id="bot-check-data">
+                    <div class="space"></div>
+                    <nav class="field">
+                        <label class="checkbox icon no-round">
+                            <input type="checkbox" oninput="checkAll()">
+                            <span>
+                                <i>close</i>
+                                <i>done</i>
+                            </span>
+                        </label>
+                    </nav>
+
+                    <article class="page small-width border small-padding max" id="bot-check-template">
+                        <div class="row "> 
+                            <label class="checkbox ">
+                                <input type="checkbox" data-ui="bot_check" checked="true">
+                                <span></span>
+                                &nbsp;&nbsp;&nbsp;
+                                <i class="extra">smart_toy</i>
+                            </label>
+                            <p class="wrap prevent-select">bot_name</p>
+                        </div>
+                    </article>
+                </div>
+                <nav>
+                    <button class="responsive large" onclick="a()">StartBot.</button>
+                </nav>
             </div>
         </div>
-        <div class="row">
-            <button class="start-button" onclick="authorizeBotSession()">Authorize Bot Session.</button>
-            <button class="start-button" onclick="start()">StartBot.</button>
-        </div>
+        <br>
     </div>
 
 </body>

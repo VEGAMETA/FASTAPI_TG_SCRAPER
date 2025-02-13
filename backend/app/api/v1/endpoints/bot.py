@@ -1,6 +1,8 @@
 from fastapi import APIRouter, File, Form, UploadFile, WebSocket, WebSocketDisconnect, Depends, Request, HTTPException, Cookie
 from sqlalchemy.ext.asyncio import AsyncSession
 
+
+from ....services.auth import AuthService
 from ....services.bot import BotService
 from ....services.proxy import ProxyService
 from ....db.session import get_db
@@ -11,6 +13,10 @@ from ....utils.file_manager import validate_archive_file, unarchive_tdata
 
 router = APIRouter()
 
+@router.get("/fetch_bots")
+async def fetch_bots(session: AsyncSession = Depends(get_db), _ = Depends(check_auth), session_token = Cookie(...)):
+    bots = await BotService(session).fetch_bots_usernames(session_token)
+    return {"bots": bots}
 
 @router.post("/create/tdata")
 async def create_tdata(
@@ -23,7 +29,7 @@ async def create_tdata(
     proxy_password: str | None = Form(...),  
     session: AsyncSession = Depends(get_db), 
     _ = Depends(check_auth),
-    session_token = Cookie("session_token")
+    session_token = Cookie(...)
     ):
     data = TData(username=username, proxy=PyrogramProxy(scheme=proxy_scheme, hostname=proxy_hostname, port=int(proxy_port), username=proxy_username, password=proxy_password))
     if not await ProxyService(session).check_proxy(data.proxy): raise HTTPException(status_code=400, detail="Bad Proxy!") 
@@ -58,9 +64,19 @@ async def create_tdata(
     return {"message": "Bot created"}
 
 @router.websocket("/create/credentials")
-async def create_credentials(websocket: WebSocket, data: PyrogramData, session: AsyncSession = Depends(get_db), _ = Depends(check_auth), session_token: str = Cookie(None)):
-    if not await ProxyService(session).check_proxy(data.proxy): raise HTTPException(status_code=400, detail="Bad Proxy!") 
+async def create_credentials(websocket: WebSocket, session: AsyncSession = Depends(get_db), session_token: str = Cookie(...)):
+    if not await AuthService(session).check_auth(session_token):
+        raise HTTPException(status_code=401, detail="Not authenticated!")
+
     await websocket.accept()
+
+    try:
+        data = PyrogramData(**await websocket.receive_json())
+    except:
+        await websocket.send_json({"status": "fail"})
+        return await websocket.close()
+
+    if not await ProxyService(session).check_proxy(data.proxy): raise HTTPException(status_code=400, detail="Bad Proxy!")
     data.proxy.scheme = "socks5" if data.proxy.scheme == "http" else data.proxy.scheme
     bot = await BotService(session).get_by_bot_username(data.username)
     if bot:

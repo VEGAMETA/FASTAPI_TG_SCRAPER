@@ -1,3 +1,5 @@
+type Nullable<T> = T | null;
+
 document.addEventListener("DOMContentLoaded", () => {
     (async () => {
         try {
@@ -23,6 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             addBot();
+            findBotSessions();
 
             const botSelector = document.querySelector<HTMLSelectElement>("#bot_select");
             if (botSelector) {

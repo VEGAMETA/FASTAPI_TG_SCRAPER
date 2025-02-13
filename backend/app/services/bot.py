@@ -22,6 +22,11 @@ class BotService:
         self.proxy_repo = ProxyRepository(Proxy)
         self.session_repo = SessionRepository(Session)
 
+    async def fetch_bots_usernames(self, session_token: str) -> list[str]:
+        bots_uuids = await self.session_repo.get_bots_by_token(self.db, session_token)
+        if not bots_uuids: return []
+        return await self.bot_repo.get_usernames_by_uuids(self.db, bots_uuids)
+    
     async def create_session_from_tdata(self, username: str) -> Path:
         await PyrogramSessionManager.create_pyrogram_session_from_tdata(username)
         return Path(f"./sessions/{username}.session")

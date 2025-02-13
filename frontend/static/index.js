@@ -145,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             addBot();
+            findBotSessions();
             const botSelector = document.querySelector("#bot_select");
             if (botSelector) {
                 const selectedBot = document.querySelector(`#${botSelector.value}`);
@@ -178,12 +179,34 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }))();
 });
-function changeBot() {
-    alert(`${this.value}`);
+function checkAll() {
+    const botChecks = document.querySelectorAll('[data-ui="bot-check"]');
+    let uncheck = true;
+    for (const botCheck of botChecks)
+        if (!botCheck.checked)
+            uncheck = false;
+    for (const botCheck of botChecks)
+        botCheck.checked = !uncheck;
+}
+function addCheckBot(username) {
+    if (!username)
+        return;
+    const possibleBot = document.querySelector(`#bot-${username}`);
+    if (possibleBot)
+        return;
+    const botTemplate = document.querySelector("#bot-check-template");
+    const botData = document.querySelector("#bot-check-data");
+    if (!botTemplate || !botData)
+        return;
+    const newBotData = botTemplate.cloneNode(true);
+    newBotData.id = `bot-${username}`;
+    newBotData.classList.remove("page");
+    newBotData.children[0].children[1].textContent = username;
+    botData.appendChild(newBotData);
 }
 function addBot() {
-    const botSelector = document.querySelector("#bot_select");
-    const botTemplate = document.querySelector("#bot_template");
+    const botSelector = document.querySelector("#bot-select");
+    const botTemplate = document.querySelector("#bot-template");
     const botData = document.querySelector("#bot-data");
     const deleteBotButton = document.querySelector("#delete-bot");
     if (!botSelector || !botTemplate || !botData || !deleteBotButton)
@@ -199,9 +222,8 @@ function addBot() {
     Array.from(botData.children).forEach(child => child.classList.remove("active"));
     newBotData.classList.add("active");
     botData.appendChild(newBotData);
-    if (botSelector.children.length > 1 && botSelector.value === newBot.value) {
+    if (botSelector.children.length > 1 && botSelector.value === newBot.value)
         deleteBotButton.classList.remove("transparent");
-    }
 }
 function deleteBot() {
     var _a;
@@ -217,21 +239,11 @@ function deleteBot() {
         const newLastBotOption = botSelector.children[botSelector.children.length - 1];
         (_a = document.querySelector(`#${newLastBotOption.value}`)) === null || _a === void 0 ? void 0 : _a.classList.add("active");
         newLastBotOption.selected = true;
-        if (botSelector.children.length > 1) {
-            deleteBotButton.classList.remove("transparent");
-        }
-        else {
-            deleteBotButton.classList.add("transparent");
-        }
+        botSelector.children.length > 1 ? deleteBotButton.classList.remove("transparent") : deleteBotButton.classList.add("transparent");
     }
 }
-//<!-- 
-// <progress class="circle"></progress>
-// <i>check</i>
-// <i>close</i> 
-// -->
 function processing() {
-    const status = document.getElementById("bot_auth_status");
+    const status = getBotEntryElement("#bot-auth-status");
     if (!status)
         return;
     status.innerHTML = '';
@@ -241,7 +253,7 @@ function processing() {
     status === null || status === void 0 ? void 0 : status.append(progress);
 }
 function bad_bot() {
-    const status = document.getElementById("bot_auth_status");
+    const status = getBotEntryElement("#bot-auth-status");
     if (!status)
         return;
     status.innerHTML = '';
@@ -254,8 +266,8 @@ function bad_bot() {
     text.textContent = "N/a.";
     status === null || status === void 0 ? void 0 : status.append(text);
 }
-function good_bot() {
-    const status = document.getElementById("bot_auth_status");
+function good_bot(username) {
+    const status = getBotEntryElement("#bot-auth-status");
     if (!status)
         return;
     status.innerHTML = '';
@@ -266,18 +278,63 @@ function good_bot() {
     const text = document.createElement("span");
     text.textContent = "Ok.";
     status === null || status === void 0 ? void 0 : status.append(text);
+    addCheckBot(username);
 }
-function requestCode() {
-    return __awaiter(this, void 0, void 0, function* () {
-        return;
-    });
+function startBots() {
+    return;
+}
+//<!-- 
+// <progress class="circle"></progress>
+// <i>check</i>
+// <i>close</i> 
+// -->
+function getBotEntry() {
+    const form = document.getElementById("bot-data");
+    for (const child of form.children)
+        if (child.classList.contains("active"))
+            return child;
+    return null;
+}
+function getBotEntryElement(querySelector, bot = getBotEntry()) {
+    if (!bot) {
+        alert("Bot not found!");
+        return null;
+    }
+    const element = bot.querySelector(querySelector);
+    return element;
+}
+function getBotEntryElementValue(querySelector) {
+    const element = getBotEntryElement(querySelector);
+    if (!element) {
+        alert("Element not found!");
+        return null;
+    }
+    return element.value;
+}
+function getUsername() {
+    return getBotEntryElementValue("#username");
+}
+function getProxy() {
+    return getBotEntryElementValue("#proxy");
+}
+function getApiId() {
+    return getBotEntryElementValue("#api-id");
+}
+function getApiHash() {
+    return getBotEntryElementValue("#api-hash");
+}
+function getPhoneNumber() {
+    return getBotEntryElementValue("#phone-number");
+}
+function getProxyType() {
+    return getBotEntryElementValue("#proxy-type");
 }
 function manageTdata(tdata_archive, username, proxy) {
     return __awaiter(this, void 0, void 0, function* () {
         const formData = new FormData();
         formData.append("tdata_archive_file", tdata_archive);
         formData.append("username", username);
-        const proxyData = getProxy();
+        const proxyData = getProxyData();
         if (!proxyData)
             return bad_bot();
         formData.append("proxy_scheme", proxyData.scheme);
@@ -295,12 +352,17 @@ function manageTdata(tdata_archive, username, proxy) {
             alert(`Ошибка при загрузке Tdata! ${errorDetail}`);
             return bad_bot();
         }
-        good_bot();
+        good_bot(username);
     });
 }
 function manageBotEntries(username, proxy) {
     return __awaiter(this, void 0, void 0, function* () {
-        const ws = new WebSocket(`${window.location.origin.replace(/^http/, "ws")}/api/v1/bot/create/credentials`);
+        if (!username || !proxy)
+            return bad_bot();
+        const proxyData = getProxy();
+        if (!proxyData)
+            return bad_bot();
+        const ws = new WebSocket(`${window.location.origin.replace(/^https?/, "ws")}/api/v1/bot/create/credentials`);
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log(data.message); // "Enter the code"
@@ -317,33 +379,32 @@ function manageBotEntries(username, proxy) {
 function authorizeBotSession() {
     return __awaiter(this, void 0, void 0, function* () {
         processing();
-        const usernameInput = document.getElementById("username");
-        if (!usernameInput) {
+        const username = getUsername();
+        if (!username) {
             bad_bot();
-            return alert("Username input not found!");
+            return alert("Username not found!");
         }
-        if (!usernameInput.value) {
+        const proxy = getProxy();
+        if (!proxy) {
             bad_bot();
-            return alert("Username is empty!");
+            return alert("Proxy not found!");
         }
-        const proxyInput = document.getElementById("proxy");
-        if (!proxyInput) {
-            bad_bot();
-            return alert("Proxy input not found!");
-        }
-        if (!proxyInput.value) {
-            bad_bot();
-            return alert("Proxy is empty!");
-        }
-        const tdataInput = document.getElementById("tdata-file");
+        const tdataInput = getBotEntryElement("#tdata-file");
         if (tdataInput && tdataInput.files && tdataInput.files.length)
-            return yield manageTdata(tdataInput.files[0], usernameInput.value, proxyInput.value);
+            return yield manageTdata(tdataInput.files[0], username, proxy);
         else
-            return yield manageBotEntries(usernameInput.value, proxyInput.value);
+            return yield manageBotEntries(username, proxy);
     });
 }
-function startBot() {
-    return;
+function findBotSessions() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch("/api/v1/bot/fetch_bots");
+        if (!response.ok)
+            return alert("Failed to fetch bot sessions!");
+        const bots = (yield response.json()).bots;
+        for (const username of bots)
+            addCheckBot(username);
+    });
 }
 function openInvite() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -408,40 +469,39 @@ function changeTheme() {
         iconElement.textContent = "dark_mode";
     }
 }
-function getProxy() {
-    const proxy_scheme = document.getElementById("proxy_type");
-    if (!proxy_scheme)
-        return alert("Proxy type input not found!");
-    const proxy = document.getElementById("proxy");
+function getProxyData(proxy = getProxy(), scheme = getProxyType()) {
     if (!proxy)
         return alert("Proxy input not found!");
-    const scheme = proxy_scheme.value;
-    const proxy_value = proxy.value;
-    const [hostname, port] = proxy_value.split("@")[0].split(":");
-    const [username, password] = proxy_value.split("@")[1].split(":");
+    if (!scheme)
+        return alert("Proxy type input not found!");
+    const [hostname, port] = proxy.split("@")[0].split(":");
+    const [username, password] = proxy.split("@")[1].split(":");
     return { scheme, hostname, port, username, password };
 }
 function checkProxy() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b, _c;
-        const proxy_field = document.getElementById("proxy_field");
+        const proxy_field = getBotEntryElement("#proxy-field");
         if (!proxy_field)
             return alert("Proxy field input not found!");
-        (_a = proxy_field.querySelector("#proxy_icon")) === null || _a === void 0 ? void 0 : _a.remove();
+        const proxy = getProxy();
+        if (!proxy)
+            return alert("Proxy is empty!");
+        (_a = getBotEntryElement("#proxy-icon")) === null || _a === void 0 ? void 0 : _a.remove();
         const progress = document.createElement("progress");
-        progress.id = "proxy_icon";
+        progress.id = "proxy-icon";
         progress.classList.add("circle");
         proxy_field.appendChild(progress);
         try {
             const response = yield fetch("/api/v1/proxy/check_proxy", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(getProxy()),
+                body: JSON.stringify(getProxyData(proxy)),
             });
             if (response.ok) {
-                (_b = proxy_field.querySelector("#proxy_icon")) === null || _b === void 0 ? void 0 : _b.remove();
+                (_b = proxy_field.querySelector("#proxy-icon")) === null || _b === void 0 ? void 0 : _b.remove();
                 const check = document.createElement("i");
-                check.id = "proxy_icon";
+                check.id = "proxy-icon";
                 check.innerHTML = "check";
                 proxy_field.appendChild(check);
                 return;
@@ -459,9 +519,9 @@ function checkProxy() {
                 alert(error);
             }
         }
-        (_c = proxy_field.querySelector("#proxy_icon")) === null || _c === void 0 ? void 0 : _c.remove();
+        (_c = proxy_field.querySelector("#proxy-icon")) === null || _c === void 0 ? void 0 : _c.remove();
         const close = document.createElement("i");
-        close.id = "proxy_icon";
+        close.id = "proxy-icon";
         close.innerHTML = "close";
         proxy_field.appendChild(close);
         return;
