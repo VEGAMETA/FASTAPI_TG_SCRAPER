@@ -13,7 +13,8 @@ from ..db.repositories.bot import BotRepository
 from ..db.repositories.proxy import ProxyRepository
 from ..utils.pyrogram_session_manager import PyrogramSessionManager
 from ..utils.file_manager import delete_session_file
-from ..schemas.pyrogram import PyrogramData, PyrogramProxy
+from ..schemas.pyrogram import PyrogramData, PyrogramProxy, SessionStatus
+from ..core.logging import logger
 
 class BotService:
     def __init__(self, db: AsyncSession):
@@ -31,11 +32,10 @@ class BotService:
         await PyrogramSessionManager.create_pyrogram_session_from_tdata(username)
         return Path(f"./sessions/{username}.session")
 
-    async def check_pyrogram_session(self, username: str) -> bool:
-        checked_session = await PyrogramSessionManager.check_pyrogram_session(username)
-        if checked_session: return True
-        delete_session_file(username)
-        return False
+    async def check_pyrogram_session(self, username: str) -> SessionStatus:
+        check_bot: SessionStatus = await PyrogramSessionManager.check_pyrogram_session(username)
+        if not check_bot.status: delete_session_file(username)
+        return check_bot
 
     async def delete_bot_by_username(self, username: str) -> None:
         await self.bot_repo.delete_bot_by_username(self.db, username)
@@ -57,9 +57,8 @@ class BotService:
     async def confirm_sign_in_with_code(self, session_manager: PyrogramSessionManager, code: str) -> None:
         await session_manager.sign_in(code)
         session_manager.session_filepath = Path(f"./sessions/{session_manager.app.name}.session")
-        if not await session_manager.check_pyrogram_session(session_manager.app.name):
-            session_manager.session_filepath.unlink()
-            raise HTTPException(status_code=400, detail="Session not created")
+        check_bot: SessionStatus = await session_manager.check_pyrogram_session(session_manager.app.name)
+        if not check_bot.status: session_manager.session_filepath.unlink()
 
     async def create_bot(self, username: str, session_file: Path, proxy: PyrogramProxy, session_token: str) -> None:
         bot: Bot = await self.bot_repo.create(self.db, {

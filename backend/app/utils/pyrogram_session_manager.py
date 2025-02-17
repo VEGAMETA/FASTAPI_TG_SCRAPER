@@ -1,3 +1,4 @@
+import asyncio
 import shutil
 
 from typing import Optional
@@ -5,7 +6,7 @@ from pathlib import Path
 from pyrogram import Client, errors, enums, types
 from TGConvertor import SessionManager
 
-from ..schemas.pyrogram import PyrogramData
+from ..schemas.pyrogram import PyrogramData, SessionStatus
 
 
 class PyrogramSessionManager:
@@ -44,11 +45,12 @@ class PyrogramSessionManager:
         ) as e: return e.MESSAGE
 
     @classmethod
-    async def check_pyrogram_session(cls, username: str) -> bool:
+    async def check_pyrogram_session(cls, username: str) -> SessionStatus:
         app = Client(username, workdir="./sessions")
         try:
-            await app.connect()
-        except AttributeError: return False
+            await asyncio.wait_for(app.connect(), 7) # 4 server sent transport error: 404 (auth key not found)
+        except AttributeError: return SessionStatus(status=False, message="Session not found")
+        except TimeoutError: return SessionStatus(status=False, message="Server sent transport error: 404 (auth key not found)")
         
         try:
             await app.get_me()
@@ -63,9 +65,9 @@ class PyrogramSessionManager:
             errors.SessionRevoked,
             errors.UserDeactivated,
             errors.UserDeactivatedBan,
-        ): return False
+        ) as e: return SessionStatus(status=False, message=e.MESSAGE)
         finally: await app.disconnect()
-        return True
+        return SessionStatus(status=True, message="Session is valid")
 
     @classmethod
     async def create_pyrogram_session_from_tdata(cls, username:str) -> None:

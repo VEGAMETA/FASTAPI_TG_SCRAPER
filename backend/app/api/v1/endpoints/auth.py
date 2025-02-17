@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, HTTPException, Response, Depends
+from fastapi import APIRouter, Cookie, Request, HTTPException, Response, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ....services.auth import AuthService
@@ -26,8 +26,8 @@ async def login(request: Request, login_data: LogInRequest, session: AsyncSessio
     return response
 
 @router.get("/check_auth")
-async def check_auth(request: Request, session: AsyncSession = Depends(get_db)):
-    if not await AuthService(session).check_auth(request.cookies.get("session_token")):
+async def check_auth(request: Request, session: AsyncSession = Depends(get_db), session_token = Cookie(None)):
+    if not await AuthService(session).check_auth(session_token):
         raise HTTPException(status_code=401, detail="Not authenticated!")
     return {"message": "Authenticated"}
 

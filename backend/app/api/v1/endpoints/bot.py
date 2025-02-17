@@ -7,7 +7,8 @@ from ....services.bot import BotService
 from ....services.proxy import ProxyService
 from ....db.session import get_db
 from ....core.logging import logger
-from ....schemas.pyrogram import PyrogramData, TData, PyrogramProxy
+from ....schemas.pyrogram import PyrogramData, SessionStatus, TData, PyrogramProxy, CodeData
+from ....schemas.status import Status
 from .auth import check_auth
 from ....utils.file_manager import validate_archive_file, unarchive_tdata
 
@@ -36,11 +37,13 @@ async def create_tdata(
     
     data.proxy.scheme = "socks5" if data.proxy.scheme == "http" else data.proxy.scheme
     bot = await BotService(session).get_by_bot_username(data.username)
+    check_bot: SessionStatus
     
-    if bot: 
-        if not await BotService(session).check_pyrogram_session(data.username):
+    if bot:
+        check_bot = await BotService(session).check_pyrogram_session(data.username)
+        if not check_bot.status:
             await BotService(session).delete_bot_by_username(data.username)
-            raise HTTPException(status_code=300, detail="Try again")
+            raise HTTPException(status_code=300, detail=f"Try again, {check_bot.message}")
         if await BotService(session).check_bot_in_session_by_session_token(session_token, bot):
             return {"message": "Bot already exists"}
         raise HTTPException(status_code=400, detail="Bot already exists")
@@ -48,8 +51,9 @@ async def create_tdata(
         tdata_archive_file = await validate_archive_file(tdata_archive_file)
         unarchive_tdata(tdata_archive_file, data.username)
         session_file = await BotService(session).create_session_from_tdata(data.username)
-        if not await BotService(session).check_pyrogram_session(data.username):
-            raise HTTPException(status_code=500, detail="Bad session")
+        check_bot = await BotService(session).check_pyrogram_session(data.username)
+        if not check_bot.status:
+            raise HTTPException(status_code=500, detail=check_bot.message)
         
         await BotService(session).create_bot(
             data.username, 
@@ -71,34 +75,40 @@ async def create_credentials(websocket: WebSocket, session: AsyncSession = Depen
     await websocket.accept()
 
     try:
-        data = PyrogramData(**await websocket.receive_json())
+        data = PyrogramData(**(await websocket.receive_json()))
     except:
-        await websocket.send_json({"status": "fail"})
+        await websocket.send_json({"status": Status.FAIL, "message": "Bot Not Created. Bad Credentials!"})
         return await websocket.close()
 
-    if not await ProxyService(session).check_proxy(data.proxy): raise HTTPException(status_code=400, detail="Bad Proxy!")
+    if not await ProxyService(session).check_proxy(data.proxy): 
+        await websocket.send_json({"status": Status.FAIL, "message": "Bot Not Created. Bad Proxy!"})
+        return await websocket.close()
+    
     data.proxy.scheme = "socks5" if data.proxy.scheme == "http" else data.proxy.scheme
     bot = await BotService(session).get_by_bot_username(data.username)
     if bot:
-        status = "success" if await BotService(session).check_bot_in_session_by_session_token(session_token, bot) else "fail"
-        await websocket.send_json({"status": status, "message": "Bot already exists"})
+        status = Status.SUCCESS if await BotService(session).check_bot_in_session_by_session_token(session_token, bot) else Status.FAIL
+        await websocket.send_json({"status": status, "message": "Bot Already Exists."})
         return await websocket.close()
+    
     try: 
-        session = await BotService(session).init_session_with_credentials(data)
+        bot_session = await BotService(session).init_session_with_credentials(data)
     except:
-        await websocket.send_json({"status": "fail"})
+        await websocket.send_json({"status": Status.FAIL, "message": "Bot Not Created. Bad Bot Credentials!"})
         return await websocket.close()
-    await websocket.send_json({"message": "Enter the code"})
+    await websocket.send_json({"status": Status.AWAITING, "message": "Send Telegram Code."})
+    
     try:
-        code: str = await websocket.receive_text()
-        await BotService(session).confirm_sign_in_with_code(session, code)
+        code_data = CodeData(**(await websocket.receive_json()))
+        await BotService(session).confirm_sign_in_with_code(bot_session, code_data.code)
         await BotService(session).create_bot(
-            session.app.name, 
-            session.session_filepath.as_posix(), 
-            session.app.proxy,
+            bot_session.app.name,
+            bot_session.session_filepath.as_posix(),
+            data.proxy,
             session_token
         )
-        await websocket.send_json({"status": "success"})
-    except:
-        await websocket.send_json({"status": "fail"})
-    return {"message": "Bot created"}
+        await websocket.send_json({"status": Status.SUCCESS, "message": "Bot Created."})
+    except Exception as e:
+        logger.error(e)
+        await websocket.send_json({"status": Status.FAIL, "message": "Bot Not Created."})
+    await websocket.close()

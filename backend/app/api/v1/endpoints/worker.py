@@ -10,7 +10,7 @@ router = APIRouter()
 # GET WORKERS, RUN WORKER, CHECK WORKER, CREATE WORKER, DELETE WORKER
 # GET WORKER DATA, GET WORKER STATUS, GET WORKER LOGS
 
-@router.get("/workers")
+@router.post("/work!")
 async def get_user_workers(request: Request):
     pass
 

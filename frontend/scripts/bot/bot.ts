@@ -7,18 +7,20 @@ function checkAll(): void {
 
 function addCheckBot(username: string): void {
     if (!username) return;
-    const possibleBot: Nullable<HTMLElement> = document.querySelector(`#bot-${username}`);
+    const possibleBot: Nullable<HTMLElement> = document.querySelector(`#bot-check-${username}`);
     if (possibleBot) return;
 
-    const botTemplate: Nullable<HTMLElement> = document.querySelector("#bot-check-template");
-    const botData: Nullable<HTMLElement> = document.querySelector("#bot-check-data");
+    const botTemplate: Nullable<HTMLElement> = document.querySelector("#check-bot-template");
+    const botData: Nullable<HTMLElement> = document.querySelector("#check-bot-data");
 
     if (!botTemplate || !botData) return;
 
     const newBotData: HTMLElement = botTemplate.cloneNode(true) as HTMLElement;
-    newBotData.id = `bot-${username}`;
+    newBotData.id = `bot-check-${username}`;
     newBotData.classList.remove("page");
-    newBotData.children[0].children[1].textContent = username;
+    const usernameText = newBotData.children[0].children[1] as HTMLElement;
+    usernameText.textContent = username;
+    usernameText.title = username;
     botData.appendChild(newBotData);
 }
 
@@ -109,10 +111,6 @@ function good_bot(username: string): void {
     status?.append(text);
     addCheckBot(username);
 }
-function startBots(): void {
-    return;
-}
-
 
 //<!-- 
 // <progress class="circle"></progress>

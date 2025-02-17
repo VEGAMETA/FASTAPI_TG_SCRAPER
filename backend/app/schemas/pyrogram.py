@@ -19,3 +19,10 @@ class PyrogramData(BaseModel):
 class TData(BaseModel):
     username: str
     proxy: PyrogramProxy
+
+class SessionStatus(BaseModel):
+    status: bool
+    message: str
+
+class CodeData(BaseModel):
+    code: str

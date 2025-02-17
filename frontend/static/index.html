@@ -184,7 +184,7 @@
                                     <input class="" type="text" id="code" placeholder="">
                                     <label>Code.</label>
                                 </div>
-                                <button class="send_button" onclick="sendCode()">
+                                <button class="send_button" id="send_code" onclick="sendCode()">
                                     Send.
                                     <div class="tooltip bottom">
                                         DO NOT SEND THE CODE
@@ -234,19 +234,26 @@
                     </div>
                     <div class="max"></div>
                     <br>
-                    <div class="upload_tdata">
+                    <div class="row">
                         <div class="">
                             <div class="field label suffix border">
-                                <input type="file" id="keywords_file">
+                                <input type="file" id="keywords-file">
                                 <input  type="text" placeholder=" " readonly="">
                                 <label class="">Keywords File.</label>
                                 <i>attach_file</i>
                             </div>
                         </div>
-                        <div class=""></div>
+                        <div class="max"></div>
+                        <div class="">
+                                <button class="circle transparent">
+                                    <i>priority_high</i>
+                                    <div class="tooltip top">File Enries Are Prioritized.</div>
+                                </button>
+                        </div>
+                        <div class="max"></div>
                         <div class="">
                             <div class="field label suffix border">
-                                <input type="file" id="chats_file">
+                                <input type="file" id="chats-file">
                                 <input  type="text" placeholder=" " readonly="">
                                 <label class="">Chats File.</label>
                                 <i>attach_file</i>
@@ -254,7 +261,7 @@
                         </div>
                     </div>
                 </fieldset>
-                <div class="row scroll" id="bot-check-data">
+                <div class="row scroll" id="check-bot-data">
                     <div class="space"></div>
                     <nav class="field">
                         <label class="checkbox icon no-round">
@@ -265,21 +272,31 @@
                             </span>
                         </label>
                     </nav>
-
-                    <article class="page small-width border small-padding max" id="bot-check-template">
+                    <article class="page small-width border small-padding max" id="check-bot-template">
                         <div class="row "> 
-                            <label class="checkbox ">
-                                <input type="checkbox" data-ui="bot_check" checked="true">
+                            <label class="checkbox">
+                                <input type="checkbox" data-ui="bot-check" checked="true">
                                 <span></span>
                                 &nbsp;&nbsp;&nbsp;
                                 <i class="extra">smart_toy</i>
                             </label>
-                            <p class="wrap prevent-select">bot_name</p>
+                            <p class="wrap prevent-select truncated" title="template">template</p>
+                        </div>
+                    </article>
+                    <article class="small-width border small-padding max" id="bot-check-template">
+                        <div class="row "> 
+                            <label class="checkbox">
+                                <input type="checkbox" data-ui="bot-check" checked="true">
+                                <span></span>
+                                &nbsp;&nbsp;&nbsp;
+                                <i class="extra">smart_toy</i>
+                            </label>
+                            <p class="wrap prevent-select truncated" title="template">template</p>
                         </div>
                     </article>
                 </div>
                 <nav>
-                    <button class="responsive large" onclick="a()">StartBot.</button>
+                    <button class="responsive large" onclick="startBots()">Start.</button>
                 </nav>
             </div>
         </div>

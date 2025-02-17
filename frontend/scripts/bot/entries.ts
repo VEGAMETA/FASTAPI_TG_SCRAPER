@@ -1,4 +1,3 @@
-
 function getBotEntry(): Nullable<HTMLElement> {
     const form = document.getElementById("bot-data") as HTMLFormElement;
     for (const child of form.children) if ((child as HTMLElement).classList.contains("active")) return child as HTMLElement;
@@ -15,6 +14,10 @@ function getBotEntryElementValue(querySelector: string): string | null {
     const element = getBotEntryElement(querySelector) as HTMLInputElement;
     if (!element) {alert("Element not found!"); return null;}
     return element.value;
+}
+
+function getCode(): Nullable<string> {
+    return getBotEntryElementValue("#code")
 }
 
 function getUsername():  Nullable<string> {

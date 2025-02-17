@@ -59,3 +59,22 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })();
 });
+
+
+function splitArrayEqually<T>(array: T[], n: number): T[][] {
+    const result: T[][] = [];
+    const length = array.length;
+    const minChunkSize = Math.floor(length / n);
+    const remainder = length % n;
+
+    let start = 0;
+
+    for (let i = 0; i < n; i++) {
+        const chunkSize = minChunkSize + (i < remainder ? 1 : 0);
+        const chunk = array.slice(start, start + chunkSize);
+        result.push(chunk);
+        start += chunkSize;
+    }
+
+    return result;
+}
