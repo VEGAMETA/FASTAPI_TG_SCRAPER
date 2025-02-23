@@ -1,4 +1,5 @@
 import multiprocessing
+from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..db.models.bot import Bot
@@ -10,6 +11,7 @@ from ..db.repositories.session import SessionRepository
 from ..db.repositories.result import ResultRepository
 from ..db.repositories.proxy import ProxyRepository
 from ..utils.worker import Worker
+from ..utils.file_manager import is_file_in_folder
 from ..schemas.worker import WorkerData
 
 
@@ -36,6 +38,11 @@ class WorkerService:
             _bot = await self.bot_repo.get(self.db, bot)
             if _bot.username == username: return _bot
 
+    async def get_usernames(self, session_token: str) -> list[str]:
+        bots = await self.session_repo.get_bots_by_token(self.db, session_token)
+        if not bots: return []
+        return await self.bot_repo.get_usernames_by_uuids(self.db, bots)
+    
     async def start_worker(self, data: WorkerData, session_token: str):
         bot: Bot = await self.get_worker(data.username, session_token)
         if not bot: return
@@ -57,3 +64,21 @@ class WorkerService:
             data.chats
         )).start()
         return True
+
+    async def get_results(self, session_token: str) -> list[str]:
+        usernames = await self.get_usernames(session_token)
+        files = Path("./out").glob(f"*{usernames}.xlsx")
+        files = sorted(files,key=lambda file: Path(file).lstat().st_mtime)[::-1]
+        if not files: return []
+        return [str(_file.name) for _file in files]
+    
+    async def get_file(self, filename: str, session_token: str) -> Path | None:
+        usernames = await self.get_usernames(session_token)
+        for username in usernames:
+            if filename.endswith(f"{username}.xlsx"): break
+        else: return
+        path = Path(Path("out") / Path(filename)).absolute()
+        if not path.exists(): return
+        if not path.is_file(): return
+        if not is_file_in_folder(path): return
+        return path

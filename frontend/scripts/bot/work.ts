@@ -34,7 +34,12 @@ async function startBots(){
     const keywords = await getKeywords();
     if (!keywords) return alert("Failed to get keywords!");
     if (keywords.length === 0) return alert("Failed to get keywords!");
-    for (const bot of bots) await startBot(bot, splitedChats.shift()!, keywords);
+    var failed_chats: string[] = [];
+    for (const bot of bots) {
+        const chats = splitedChats.shift()!;
+        chats.push(...failed_chats);
+        if (!await startBot(bot, chats, keywords)) failed_chats.push(...chats);
+    }
 }
 
 async function startBot(username: string, chats: string[], keywords: string[]){
@@ -47,5 +52,9 @@ async function startBot(username: string, chats: string[], keywords: string[]){
             body: JSON.stringify({ username, chats, keywords })
         }
     );
-    if (!response.ok) return alert(`Failed to start bot ${username}!`);
+    if (!response.ok) {
+        alert(`Failed to start bot ${username}!`);
+        return false;
+    }
+    return true;
 }

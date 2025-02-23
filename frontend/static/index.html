@@ -24,14 +24,19 @@
 <body class="responsive italic">
     <div class="dialog-code">
         <div class="overlay"></div>
-        <dialog class="modal" id="dialog-modal">
-            <h5>Помощь: Что делает этот бот?</h5>
+        <dialog class="modal" id="dialog-help">
+            <div class="row">
+                <h5 class="max">Помощь: Что делает этот бот?</h5>
+                <button class="transparent circle" data-ui="#dialog-help" onclick="closeHelp()">
+                    <i>close</i>
+                </button>
+            </div>
             <div>
-                <p>
+                <div>
                     Этот бот предназначен для сбора данных о пользователях и их сообщениях из указанных чатов Telegram. 
                     На основе собранной информации бот формирует результаты и предоставляет их в удобном формате.
                     <a href="https://my.telegram.org/auth?to=apps" class="inverse-surface" target="_blank">&nbsp;Получить api_id и api_hash&nbsp;</a>
-                </p>
+                </div>
                 <b>Для работы бота необходимо:</b>
                 <ol>
                     <li>
@@ -64,17 +69,29 @@
                     </li>
                 </ol>
                 Если у вас возникли вопросы, обратитесь к разработчику.</div>
-            <nav class="right-align no-space">
-                <button class="transparent link" data-ui="#dialog-modal" onclick="closeHelp()">Ok.</button>
-            </nav>
         </dialog>
         <dialog class="modal" id="dialog-invite">
-            <h5>Invite Token.</h5>
+            <div class="row">
+                <h5 class="max">Invite Token.</h5>
+                <button class="transparent circle" data-ui="#dialog-invite" onclick="closeInvite()">
+                    <i>close</i>
+                </button>
+            </div>
             <div id="invite_token">
             </div>
-            <nav class="right-align no-space">
-                <button class="transparent link" data-ui="#dialog-invite" onclick="closeInvite()">Ok.</button>
-            </nav>
+        </dialog>
+        <dialog class="modal" id="dialog-results">
+            <div class="row">
+                <h5 class="max">Results.</h5>
+                <button class="transparent circle" data-ui="#dialog-results" onclick="closeResults()">
+                    <i>close</i>
+                </button>
+            </div>
+            <div id="results">
+                <table id="results-table"></table>
+                <br>
+                <button onclick="downloadAll()">Download All.</button>
+            </div>
         </dialog>
     </div>
     <div class="login-page extra" style="display: none;">
@@ -104,9 +121,10 @@
         <div class="header">
             <h1><b>Scrape Telegram Chats.</b></h1>
             <div>
+                <button data-ui="#dialog-results" class="transparent circle header-button" onclick="openResults()"><i>download</i></button>
+                <button data-ui="#dialog-help" class="transparent circle header-button" onclick="openHelp()"><i>help</i></button>
                 <button data-ui="#dialog-invite" class="transparent circle header-button" onclick="openInvite()"><i>group_add</i></button>
                 <button class="transparent circle header-button moon" onclick="changeTheme()" id="change_theme"><i>light_mode</i></button>
-                <button data-ui="#dialog-modal" class="transparent circle header-button" onclick="openHelp()"><i>help</i></button>
                 <button class="transparent circle header-button" onclick="logout()"><i>logout</i></button>
             </div>
         </div>
@@ -286,17 +304,6 @@
                             <p class="wrap prevent-select truncated" title="template">template</p>
                         </div>
                     </article>
-                    <article class="small-width border small-padding max" id="bot-check-template">
-                        <div class="row max"> 
-                            <label class="checkbox">
-                                <input type="checkbox" data-ui="bot-check" checked="true">
-                                <span></span>
-                                &nbsp;&nbsp;&nbsp;
-                                <i class="extra">smart_toy</i>
-                            </label>
-                            <p class="wrap prevent-select truncated" title="template">template</p>
-                        </div>
-                    </article>
                 </div>
                 <nav>
                     <button class="responsive large" onclick="startBots()">Start.</button>
@@ -305,6 +312,5 @@
         </div>
         <br>
     </div>
-
 </body>
 </html>

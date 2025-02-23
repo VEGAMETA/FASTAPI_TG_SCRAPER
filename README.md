@@ -1,21 +1,19 @@
-# FastAPI Token-Based Authentication
+# FAST API TG SCRAPER
 
-## Описание
+## Setting Up
 
-Приложение позволяет пользователям входить с использованием токена, который сохраняется в куки.
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-## Запуск
+## Run
 
-1. Установите зависимости:
+```bash
+chmod +x ./run
+```
 
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-2. Запустите приложение:
-
-    ```bash
-    uvicorn backend.app.main:app --reload
-    ```
-
-3. Перейдите на [http://localhost:8000](http://localhost:8000) для тестирования.
+```bash
+./run
+```

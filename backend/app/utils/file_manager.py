@@ -1,3 +1,4 @@
+import os
 import uuid
 import shutil
 import patoolib
@@ -53,3 +54,13 @@ def safe_extract(file_path, extract_path):
     if not p.is_alive(): return
     p.terminate()
     raise ValueError("Распаковка заняла слишком много времени")
+
+def is_file_in_folder(file_path: str | Path, folder: str | Path = "out") -> bool:
+    current_dir = Path(os.getcwd())
+    file_path = Path(file_path).absolute()
+    if not file_path.is_relative_to(current_dir):
+        return False
+    out_folder = current_dir / folder
+    if not file_path.is_relative_to(out_folder):
+        return False
+    return True

@@ -26,7 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             addBot();
             findBotSessions();
-
+            getResults();
+            
             const botSelector = document.querySelector<HTMLSelectElement>("#bot_select");
             if (botSelector) {
                 const selectedBot = document.querySelector<HTMLElement>(`#${botSelector.value}`);

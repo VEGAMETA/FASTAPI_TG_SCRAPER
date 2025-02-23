@@ -23,13 +23,26 @@ function closeInvite(): void {
 }
 
 function openHelp(): void {
-    const modal = document.getElementById("dialog-modal") as HTMLElement;
+    const modal = document.getElementById("dialog-help") as HTMLElement;
     if (!modal) return;
     modal.classList.add('active');
 }
 
+async function openResults(): Promise<void> {
+    await getResults();
+    const modal = document.getElementById("dialog-results") as HTMLElement;
+    if (!modal) return;
+    modal.classList.add('active');
+}
+
+function closeResults(): void {
+    const modal = document.getElementById("dialog-results") as HTMLElement;
+    if (!modal) return;
+    modal.classList.remove('active');
+}
+
 function closeHelp(): void {
-    const modal = document.getElementById("dialog-modal") as HTMLElement;
+    const modal = document.getElementById("dialog-help") as HTMLElement;
     if (!modal) return;
     modal.classList.remove('active');
 }

@@ -146,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             addBot();
             findBotSessions();
+            getResults();
             const botSelector = document.querySelector("#bot_select");
             if (botSelector) {
                 const selectedBot = document.querySelector(`#${botSelector.value}`);
@@ -247,13 +248,28 @@ function closeInvite() {
     modal.classList.remove('active');
 }
 function openHelp() {
-    const modal = document.getElementById("dialog-modal");
+    const modal = document.getElementById("dialog-help");
     if (!modal)
         return;
     modal.classList.add('active');
 }
+function openResults() {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield getResults();
+        const modal = document.getElementById("dialog-results");
+        if (!modal)
+            return;
+        modal.classList.add('active');
+    });
+}
+function closeResults() {
+    const modal = document.getElementById("dialog-results");
+    if (!modal)
+        return;
+    modal.classList.remove('active');
+}
 function closeHelp() {
-    const modal = document.getElementById("dialog-modal");
+    const modal = document.getElementById("dialog-help");
     if (!modal)
         return;
     modal.classList.remove('active');
@@ -338,6 +354,92 @@ function checkProxy() {
         close.innerHTML = "close";
         proxy_field.appendChild(close);
         return;
+    });
+}
+function getResults() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch("/api/v1/worker/results");
+        if (!response.ok)
+            return console.error("Failed to get results!");
+        const data = yield response.json();
+        if (!data.results)
+            return console.info("No results!");
+        const table = document.getElementById("results-table");
+        table.innerHTML = '';
+        for (const result of data.results) {
+            const row = table.insertRow();
+            row.insertCell().textContent = result;
+            const cell = row.insertCell();
+            const button = document.createElement("button");
+            button.classList.add("circle");
+            button.classList.add("light-green-text");
+            button.classList.add("transparent");
+            const icon = document.createElement("i");
+            icon.textContent = "download";
+            button.appendChild(icon);
+            button.addEventListener("click", () => downloadFile(result));
+            cell.appendChild(button);
+        }
+    });
+}
+function downloadFile(filename) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const response = yield fetch(`/api/v1/worker/results/${filename}`);
+            if (!response.ok) {
+                throw new Error(`Failed to get file: ${response.statusText}`);
+            }
+            const contentType = response.headers.get('content-type');
+            if (!contentType) {
+                throw new Error("Content-Type header is missing");
+            }
+            if (contentType.startsWith('application/json')) {
+                const data = yield response.json();
+                console.log("Received JSON data:", data);
+                return data;
+            }
+            else if (contentType.startsWith('text/')) {
+                const text = yield response.text();
+                console.log("Received text data:", text);
+                return text;
+            }
+            else if (contentType.startsWith('image/')) {
+                const blob = yield response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                console.log("Received image, URL:", imageUrl);
+                return imageUrl;
+            }
+            else {
+                const blob = yield response.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = filename;
+                link.click();
+                URL.revokeObjectURL(url);
+                console.log("File downloaded:", filename);
+                return url;
+            }
+        }
+        catch (error) {
+            if (!(error instanceof Error))
+                return;
+            console.error("Error fetching file:", error);
+            alert("Failed to get file: " + error.message);
+        }
+    });
+}
+function downloadAll() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch("/api/v1/worker/results");
+        if (!response.ok)
+            return alert("Failed to get results!");
+        const data = yield response.json();
+        if (!data.results)
+            return alert("No results!");
+        for (const result of data.results) {
+            yield downloadFile(result);
+        }
     });
 }
 function checkAll() {
@@ -658,8 +760,13 @@ function startBots() {
             return alert("Failed to get keywords!");
         if (keywords.length === 0)
             return alert("Failed to get keywords!");
-        for (const bot of bots)
-            yield startBot(bot, splitedChats.shift(), keywords);
+        var failed_chats = [];
+        for (const bot of bots) {
+            const chats = splitedChats.shift();
+            chats.push(...failed_chats);
+            if (!(yield startBot(bot, chats, keywords)))
+                failed_chats.push(...chats);
+        }
     });
 }
 function startBot(username, chats, keywords) {
@@ -671,7 +778,10 @@ function startBot(username, chats, keywords) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ username, chats, keywords })
         });
-        if (!response.ok)
-            return alert(`Failed to start bot ${username}!`);
+        if (!response.ok) {
+            alert(`Failed to start bot ${username}!`);
+            return false;
+        }
+        return true;
     });
 }
