@@ -45,7 +45,7 @@ class AuthService:
     async def check_auth(self, session_token: Optional[str]) -> bool:
         session: Session = await self.session_repo.get_by_token(self.db, session_token)
         if not session: return False
-        user: User = await self.user_repo.get_by_uuid(self.db, session.user_uuid)
+        user: User = await self.user_repo.get(self.db, session.user_uuid)
         return user is not None
     
     async def invite_token(self) -> str:

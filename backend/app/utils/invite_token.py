@@ -21,4 +21,5 @@ async def regenerate_token() -> None:
         async with lock:
             INVITE_TOKEN = uuid4().hex + uuid4().hex + uuid4().hex
         logger.info(f"Regenerated token: {INVITE_TOKEN}")
+        with open("invite_token", "w") as f: f.write(INVITE_TOKEN)
         await asyncio.sleep(36000)

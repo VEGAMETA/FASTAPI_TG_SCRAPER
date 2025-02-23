@@ -12,7 +12,7 @@ class ProxyService:
         self.proxy_repository = ProxyRepository(Proxy)
 
     async def check_proxy(self, proxy: PyrogramProxy) -> bool:
-        _proxy: Proxy = await self.proxy_repository.get(self.db, proxy) if proxy.username and proxy.password else await self.proxy_repository.get_by_ip_port(self.db, proxy.hostname, proxy.port) 
+        _proxy: Proxy = await self.proxy_repository.get_no_scheme(self.db, proxy) if proxy.username and proxy.password else await self.proxy_repository.get_by_ip_port(self.db, proxy.hostname, proxy.port) 
         if not ProxyChecker.check_proxy(proxy):
             if _proxy: await self.proxy_repository.delete(self.db, _proxy)
             raise HTTPException(status_code=400, detail="Bad Proxy!")

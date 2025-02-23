@@ -4,3 +4,5 @@ env/
 venv/
 *.env
 node_modules/
+invite_token
+*.log

@@ -8,10 +8,6 @@ from ..models.proxy import Proxy
 from ...schemas.pyrogram import PyrogramProxy
 
 class ProxyRepository(BaseRepository[Proxy]):
-    async def get_by_uuid(self, db: AsyncSession, uuid: str) -> Optional[Proxy]:
-        result = await db.execute(select(self.model).where(self.model.uuid == uuid))
-        return result.scalars().first()
-
     async def get_by_ip_port(self, db: AsyncSession, ip: str, port: int) -> Optional[Proxy]:
         result = await db.execute(select(self.model).where(self.model.ip == ip, self.model.port == port))
         return result.scalars().first()

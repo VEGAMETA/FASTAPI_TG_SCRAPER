@@ -336,8 +336,14 @@ function checkProxy() {
                 return;
             }
             else {
+                // CHECK RESPONSE IS VALID JSON
+                if (response.headers.get("Content-Type") !== "application/json")
+                    throw new TypeError("Invalid proxy");
                 const data = yield response.json();
-                alert(data.detail);
+                if (data.detail)
+                    alert(data.detail);
+                else
+                    alert("Proxy is valid");
             }
         }
         catch (error) {

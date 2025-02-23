@@ -12,7 +12,8 @@ docker compose up -d
 if [ -f "$CERT_PATH" ] && [ -f "$KEY_PATH" ]; then
     uvicorn backend.app.main:app --reload --loop uvloop --host 0.0.0.0 --port 8000 \
         --ssl-certfile=$CERT_PATH \
-        --ssl-keyfile=$KEY_PATH 
+        --ssl-keyfile=$KEY_PATH \
+        --log-config ./config/log.ini
 else
-    uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 80
+    uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 80 --log-config ./config/log.ini
 fi

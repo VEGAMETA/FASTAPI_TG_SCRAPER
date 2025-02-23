@@ -72,8 +72,5 @@ class BotService:
     async def get_by_bot_username(self, username: str) -> Optional[Bot]:
         return await self.bot_repo.get_by_username(self.db, username)
 
-    async def get_by_uuid(self, uuid: str) -> Optional[Bot]:
-        return await self.bot_repo.get_by_uuid(self.db, uuid)
-
     async def get_all_by_session_uuid(self, uuid: str) -> Optional[Bot]:
         return await self.bot_repo.get_all_by_session_uuid(self.db, uuid)

@@ -10,10 +10,6 @@ from ..models.user import User
 
 
 class BotRepository(BaseRepository[Bot]):
-    async def get_by_uuid(self, db: AsyncSession, uuid: UUID) -> Optional[Bot]:
-        result = await db.execute(select(self.model).where(self.model.uuid == uuid))
-        return result.scalars().first()
-    
     async def get_by_username(self, db: AsyncSession, username: str) -> Optional[Bot]:
         result = await db.execute(select(self.model).where(self.model.username == username))
         return result.scalars().first()

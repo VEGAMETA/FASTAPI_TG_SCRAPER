@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -10,10 +10,6 @@ from ..models.user import User
 
 
 class UserRepository(BaseRepository[User]):
-    async def get_by_uuid(self, db: AsyncSession, uuid: str) -> Optional[User]:
-        result = await db.execute(select(self.model).where(self.model.uuid == uuid))
-        return result.scalars().first()
-
     async def get_by_username(self, db: AsyncSession, username: str) -> Optional[User]:
         result = await db.execute(select(self.model).where(self.model.username == username))
         return result.scalars().first()
