@@ -1,2 +1,18 @@
 #!/bin/bash
-uvicorn backend.app.main:app --reload
+sudo service docker start
+sleep 1
+source /etc/profile
+
+CERT_PATH="/etc/letsencrypt/live/$DOMAIN/fullchain.pem"
+KEY_PATH="/etc/letsencrypt/live/$DOMAIN/privkey.pem"
+
+source ./venv/bin/activate
+docker compose up -d
+
+if [ -f "$CERT_PATH" ] && [ -f "$KEY_PATH" ]; then
+    uvicorn backend.app.main:app --reload --loop uvloop --host 0.0.0.0 --port 8000 \
+        --ssl-certfile=$CERT_PATH \
+        --ssl-keyfile=$KEY_PATH 
+else
+    uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 80
+fi

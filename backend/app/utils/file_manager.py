@@ -1,6 +1,7 @@
 import uuid
-import patoolib
 import shutil
+import patoolib
+import multiprocessing
 
 from pathlib import Path
 from fastapi import UploadFile, HTTPException
@@ -31,15 +32,24 @@ async def validate_archive_file(_file: UploadFile) -> Path:
 
 def unarchive_tdata(arch_path: Path, username: str) -> None:
     tdata_dest = Path(f"./temp/tdatas/{username}")
-    patoolib.extract_archive(str(arch_path), outdir=str(tdata_dest))
+    safe_extract(str(arch_path), str(tdata_dest))
     arch_path.unlink()
     posible_tdata = tdata_dest / "tdata"
     if not posible_tdata.exists(): return
     shutil.copytree(posible_tdata, tdata_dest, dirs_exist_ok=True)
     shutil.rmtree(posible_tdata)
-    
 
 def delete_session_file(username: str) -> None:
     session_file = Path(f"./session/{username}.session")
     if not session_file.exists(): return
     session_file.unlink()
+
+
+def safe_extract(file_path, extract_path):
+    p = multiprocessing.Process(target=patoolib.extract_archive, args=(file_path, -1, extract_path))
+    p.start()
+    p.join(timeout=10)
+
+    if not p.is_alive(): return
+    p.terminate()
+    raise ValueError("Распаковка заняла слишком много времени")

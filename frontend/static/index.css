@@ -1,5 +1,7 @@
+/* 
+@import "https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"; */
 
-@import "https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.css";
+@import "https://cdn.jsdelivr.net/npm/beercss@3.9.4/dist/cdn/beer.min.css";
 
 @import "styles/base.css";
 

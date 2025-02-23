@@ -1,5 +1,12 @@
 import asyncio
 import colorama
+import uvloop
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.extension import RateLimitExceeded, _rate_limit_exceeded_handler
 
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
@@ -26,6 +33,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan, title="Search Bot API")
 
+app.state.limiter = Limiter(key_func=get_remote_address, default_limits=["3/second"])
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -33,7 +43,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+# app.add_middleware(HTTPSRedirectMiddleware)
 
 app.include_router(api_v1_router, prefix="/api/v1", tags=["api_v1"])
 app.include_router(web_router, prefix="", tags=["web"])

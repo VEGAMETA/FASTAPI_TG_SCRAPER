@@ -32,7 +32,16 @@ async def create_tdata(
     _ = Depends(check_auth),
     session_token = Cookie(...)
     ):
-    data = TData(username=username, proxy=PyrogramProxy(scheme=proxy_scheme, hostname=proxy_hostname, port=int(proxy_port), username=proxy_username, password=proxy_password))
+    data = TData(
+        username=username, 
+        proxy=PyrogramProxy(
+            scheme=proxy_scheme, 
+            hostname=proxy_hostname, 
+            port=int(proxy_port), 
+            username=proxy_username, 
+            password=proxy_password
+        )
+    )
     if not await ProxyService(session).check_proxy(data.proxy): raise HTTPException(status_code=400, detail="Bad Proxy!") 
     
     data.proxy.scheme = "socks5" if data.proxy.scheme == "http" else data.proxy.scheme

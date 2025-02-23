@@ -10,14 +10,18 @@
     <meta name="author" content="VEGAMETA">
 
     <title>TG Messages Scrapper Bot.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="../static/index.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsSHA/2.0.2/sha.js"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.8.0/dist/cdn/beer.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/beercss@3.9.4/dist/cdn/beer.min.js"></script>
     <script type="module" src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js"></script>
     <script src="../static/index.js" defer></script>
 
 </head>
-<body class="responsive">
+<body class="responsive italic">
     <div class="dialog-code">
         <div class="overlay"></div>
         <dialog class="modal" id="dialog-modal">
@@ -98,7 +102,7 @@
     </div>
     <div class="main-page" style="display: none;">  
         <div class="header">
-            <h1><b>ScraMBT.</b></h1>
+            <h1><b>Scrape Telegram Chats.</b></h1>
             <div>
                 <button data-ui="#dialog-invite" class="transparent circle header-button" onclick="openInvite()"><i>group_add</i></button>
                 <button class="transparent circle header-button moon" onclick="changeTheme()" id="change_theme"><i>light_mode</i></button>
@@ -107,8 +111,8 @@
             </div>
         </div>
         <br>
-        <div class="grid large-space">
-            <div class="s6">
+        <div class="grid large-space max">
+            <div class="s6 max">
                 <fieldset>
                     <legend>Bots.</legend>
                     <div class="field border label">
@@ -126,12 +130,12 @@
 
                     <div class="page padding" data-ui="bot-template" id="bot-template">
                         
-                        <div class="row">
+                        <div class="row max">
                             <button class="circle transparent">
                                 <i class="circle">brightness_empty</i>
                                 <div class="tooltip bottom">This Field Is Essential.</div>
                             </button>
-                            <div class="field suffix border">
+                            <div class="field suffix border ">
                                 <select id="proxy-type">
                                     <option value="http">HTTP.</option>
                                     <option value="socks4">SOCKS4.</option>
@@ -144,7 +148,7 @@
                                 <label>Proxy.</label>
                                 <div class="tooltip bottom">IP:PORT@USERNAME:PASSWORD</div>
                             </div>
-                            <button onclick="checkProxy()">Check Proxy.</button>
+                            <button class="min" onclick="checkProxy()">Check.</button>
                         </div>
                         <div class="row">
                             <button class="circle transparent">
@@ -216,26 +220,27 @@
             </div>
 
 
-            <div class="s6">
+            <div class="s6 max">
                 <fieldset>
                     <legend>Settings.</legend>
-                    <div class="upload-field">
-                        <div class="field textarea label border upload-field">
-                            <textarea type="text" id="keywords" placeholder=""></textarea>
-                            <label>Keywords.</label>
+                    <div class="row">
+                        <div class="max">
+                            <div class="field textarea label border upload-field">
+                                <textarea type="text" id="keywords" placeholder=""></textarea>
+                                <label>Keywords.</label>
+                            </div>
                         </div>
-                    </div>
-                    <br>
-                    <div class="upload-field">
-                        <div class="field textarea label border upload-field">
-                            <textarea type="text" id="chats" placeholder=""></textarea>
-                            <label>Chats.</label>
+                        <div class="max">
+                            <div class="field textarea label border upload-field">
+                                <textarea type="text" id="chats" placeholder=""></textarea>
+                                <label>Chats.</label>
+                            </div>
                         </div>
                     </div>
                     <div class="max"></div>
                     <br>
-                    <div class="row">
-                        <div class="">
+                    <div class="row max">
+                        <div class="max">
                             <div class="field label suffix border">
                                 <input type="file" id="keywords-file">
                                 <input  type="text" placeholder=" " readonly="">
@@ -243,15 +248,13 @@
                                 <i>attach_file</i>
                             </div>
                         </div>
-                        <div class="max"></div>
                         <div class="">
                                 <button class="circle transparent">
                                     <i>priority_high</i>
                                     <div class="tooltip top">File Enries Are Prioritized.</div>
                                 </button>
                         </div>
-                        <div class="max"></div>
-                        <div class="">
+                        <div class="max">
                             <div class="field label suffix border">
                                 <input type="file" id="chats-file">
                                 <input  type="text" placeholder=" " readonly="">
@@ -284,7 +287,7 @@
                         </div>
                     </article>
                     <article class="small-width border small-padding max" id="bot-check-template">
-                        <div class="row "> 
+                        <div class="row max"> 
                             <label class="checkbox">
                                 <input type="checkbox" data-ui="bot-check" checked="true">
                                 <span></span>

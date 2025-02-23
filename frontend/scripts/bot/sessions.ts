@@ -37,9 +37,9 @@ async function manageBotEntries(username: string, proxy_string: string): Promise
     if (!api_hash) return bad_bot();
     const phone_number = getPhoneNumber();
     if (!phone_number) return bad_bot();
+    const ws_entry: string = window.location.origin.startsWith("https") ? "wss" : "ws";
+    const ws = new WebSocket(`${window.location.origin.replace(/^https?/, ws_entry)}/api/v1/bot/create/credentials`);
 
-    const ws = new WebSocket(`${window.location.origin.replace(/^https?/, "ws")}/api/v1/bot/create/credentials`);
-    
     ws.onopen = () => ws.send(JSON.stringify({ api_id, api_hash, username, phone_number, proxy }));
 
     ws.onmessage = (event) => {
@@ -75,7 +75,10 @@ async function authorizeBotSession(): Promise<void> {
 
 async function findBotSessions() {
     const response = await fetch("/api/v1/bot/fetch_bots");
-    if (!response.ok) return alert("Failed to fetch bot sessions!");
+    if (!response.ok){
+        if (response.status === 401) console.log("Unauthorized");
+        else return alert("Failed to fetch bot sessions!");
+    }
     const bots: string[] = (await response.json()).bots;
     for (const username of bots) addCheckBot(username);
 }

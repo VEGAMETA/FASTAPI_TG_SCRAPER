@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete, select
+from sqlalchemy import UUID, delete, select
 
 
 from ..base_repository import BaseRepository
@@ -17,6 +17,6 @@ class SessionRepository(BaseRepository[Session]):
         result = await db.execute(select(self.model).where(self.model.token == token))
         return result.scalars().first()
 
-    async def get_bots_by_token(self, db: AsyncSession, token: str) -> list[Bot]:
+    async def get_bots_by_token(self, db: AsyncSession, token: str) -> list[UUID]:
         result = await db.execute(select(self.model).where(self.model.token == token))
         return result.scalars().first().bots

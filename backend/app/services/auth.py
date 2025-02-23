@@ -31,13 +31,14 @@ class AuthService:
         if user: raise HTTPException(status_code=400, detail="User already exists")
         user = await self.user_repo.create(self.db, {"username": username, "password_hash": password, "ip": ip})
         if not user: raise HTTPException(status_code=500, detail="User not created")
-        session = await self._check_create_session(user)
+        session: Session = await self._check_create_session(user)
         if not session: raise HTTPException(status_code=500, detail="Session not created")
+        await self.user_repo.update(self.db, user.uuid, {"session_uuid": session.uuid})
         return session.token
 
     async def login(self, username: str, password: str) -> Optional[str]:
         user: User = await self.user_repo.get_by_credentials(self.db, username, password)
-        session = await self._check_create_session(user)
+        session: Session = await self._check_create_session(user)
         if not session: raise HTTPException(status_code=500, detail="Session not created")
         return session.token
 

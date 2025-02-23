@@ -538,7 +538,8 @@ function manageBotEntries(username, proxy_string) {
         const phone_number = getPhoneNumber();
         if (!phone_number)
             return bad_bot();
-        const ws = new WebSocket(`${window.location.origin.replace(/^https?/, "ws")}/api/v1/bot/create/credentials`);
+        const ws_entry = window.location.origin.startsWith("https") ? "wss" : "ws";
+        const ws = new WebSocket(`${window.location.origin.replace(/^https?/, ws_entry)}/api/v1/bot/create/credentials`);
         ws.onopen = () => ws.send(JSON.stringify({ api_id, api_hash, username, phone_number, proxy }));
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
@@ -582,8 +583,12 @@ function authorizeBotSession() {
 function findBotSessions() {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield fetch("/api/v1/bot/fetch_bots");
-        if (!response.ok)
-            return alert("Failed to fetch bot sessions!");
+        if (!response.ok) {
+            if (response.status === 401)
+                console.log("Unauthorized");
+            else
+                return alert("Failed to fetch bot sessions!");
+        }
         const bots = (yield response.json()).bots;
         for (const username of bots)
             addCheckBot(username);
@@ -609,33 +614,6 @@ function getBotList() {
             botNames.push(bot.id.replace('bot-check-', ''));
     }
     return botNames;
-}
-function startBots() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const bots = getBotList();
-        if (!bots)
-            return alert("No bots to start!");
-        const splitedChats = yield getSplitedChats(bots.length);
-        if (!splitedChats)
-            return alert("Failed to get chats!");
-        if (splitedChats.every(innerArray => innerArray.length === 0))
-            return alert("Failed to get chats!");
-        const keywords = yield getKeywords();
-        if (!keywords)
-            return alert("Failed to get keywords!");
-        if (keywords.length === 0)
-            return alert("Failed to get keywords!");
-        alert(splitedChats.join("\n"));
-        for (const bot of bots) {
-            yield startBot(bot, splitedChats.shift(), keywords);
-        }
-    });
-}
-function startBot(username, chats, keywords) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (chats.length === 0)
-            return;
-    });
 }
 function getSplitedChats(botsAmmount) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -663,5 +641,37 @@ function getKeywords() {
             return yield processFile(file);
         else
             return (_b = (_a = document.getElementById("keywords")) === null || _a === void 0 ? void 0 : _a.value) === null || _b === void 0 ? void 0 : _b.split(/\r?\n/).filter(line => line.trim() !== "");
+    });
+}
+function startBots() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const bots = getBotList();
+        if (!bots)
+            return alert("No bots to start!");
+        const splitedChats = yield getSplitedChats(bots.length);
+        if (!splitedChats)
+            return alert("Failed to get chats!");
+        if (splitedChats.every(innerArray => innerArray.length === 0))
+            return alert("Failed to get chats!");
+        const keywords = yield getKeywords();
+        if (!keywords)
+            return alert("Failed to get keywords!");
+        if (keywords.length === 0)
+            return alert("Failed to get keywords!");
+        for (const bot of bots)
+            yield startBot(bot, splitedChats.shift(), keywords);
+    });
+}
+function startBot(username, chats, keywords) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (chats.length === 0)
+            return;
+        const response = yield fetch("/api/v1/worker/start", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, chats, keywords })
+        });
+        if (!response.ok)
+            return alert(`Failed to start bot ${username}!`);
     });
 }
