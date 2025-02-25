@@ -49,8 +49,13 @@ function addBot(): void {
     if (botSelector.children.length > 1 && botSelector.value === newBot.value) deleteBotButton.classList.remove("transparent");
 }
 
+function changeBot(): void {
+    const deleteBotButton: Nullable<HTMLButtonElement> = document.querySelector("#delete-bot");
+    if (deleteBotButton) deleteBotButton.classList.remove("transparent");
+}
+
 function deleteBot(): void {
-    const botSelector: Nullable<HTMLSelectElement> = document.querySelector("#bot_select");
+    const botSelector: Nullable<HTMLSelectElement> = document.querySelector("#bot-select");
     const deleteBotButton: Nullable<HTMLButtonElement> = document.querySelector("#delete-bot");
 
     if (!botSelector || !deleteBotButton || botSelector.children.length <= 1) return;

@@ -13,7 +13,13 @@ class ProxyRepository(BaseRepository[Proxy]):
         return result.scalars().first()
     
     async def get_no_scheme(self, db: AsyncSession, proxy: PyrogramProxy) -> Optional[Proxy]:
-        result = await db.execute(select(self.model).where(self.model.ip == proxy.hostname, self.model.port == proxy.port, self.model.username == proxy.username, self.model.password == proxy.password))
+        proxy_dump = proxy.model_dump()
+        result = await db.execute(select(self.model).where(
+            self.model.ip == proxy_dump.get("hostname"), 
+            self.model.port == proxy_dump.get("port"),
+            self.model.username == proxy_dump.get("username", None), 
+            self.model.password == proxy_dump.get("password", None)
+        ))
         return result.scalars().first()
     
     async def free(self, db: AsyncSession, proxy: Proxy) -> None:

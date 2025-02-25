@@ -496,9 +496,14 @@ function addBot() {
     if (botSelector.children.length > 1 && botSelector.value === newBot.value)
         deleteBotButton.classList.remove("transparent");
 }
+function changeBot() {
+    const deleteBotButton = document.querySelector("#delete-bot");
+    if (deleteBotButton)
+        deleteBotButton.classList.remove("transparent");
+}
 function deleteBot() {
     var _a;
-    const botSelector = document.querySelector("#bot_select");
+    const botSelector = document.querySelector("#bot-select");
     const deleteBotButton = document.querySelector("#delete-bot");
     if (!botSelector || !deleteBotButton || botSelector.children.length <= 1)
         return;
@@ -770,6 +775,7 @@ function startBots() {
         for (const bot of bots) {
             const chats = splitedChats.shift();
             chats.push(...failed_chats);
+            failed_chats = [];
             if (!(yield startBot(bot, chats, keywords)))
                 failed_chats.push(...chats);
         }

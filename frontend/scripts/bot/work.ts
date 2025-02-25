@@ -38,6 +38,7 @@ async function startBots(){
     for (const bot of bots) {
         const chats = splitedChats.shift()!;
         chats.push(...failed_chats);
+        failed_chats = [];
         if (!await startBot(bot, chats, keywords)) failed_chats.push(...chats);
     }
 }
