@@ -10,7 +10,7 @@ from ....core.logging import logger
 from ....schemas.pyrogram import PyrogramData, SessionStatus, TData, PyrogramProxy, CodeData
 from ....schemas.status import Status
 from .auth import check_auth
-from ....utils.file_manager import validate_archive_file, unarchive_tdata
+from ....utils.file_manager import validate_archive_file, unarchive_tdata, delete_tdata
 
 router = APIRouter()
 
@@ -63,7 +63,6 @@ async def create_tdata(
         check_bot = await BotService(session).check_pyrogram_session(data.username)
         if not check_bot.status:
             raise HTTPException(status_code=500, detail=check_bot.message)
-        
         await BotService(session).create_bot(
             data.username, 
             session_file, 
@@ -74,6 +73,8 @@ async def create_tdata(
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        delete_tdata(data.username)
     return {"message": "Bot created"}
 
 @router.websocket("/create/credentials")

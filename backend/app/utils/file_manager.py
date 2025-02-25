@@ -40,11 +40,15 @@ def unarchive_tdata(arch_path: Path, username: str) -> None:
     shutil.copytree(posible_tdata, tdata_dest, dirs_exist_ok=True)
     shutil.rmtree(posible_tdata)
 
+def delete_tdata(username: str) -> None:
+    tdata_path = Path(f"./temp/tdatas/{username}")
+    if not tdata_path.exists(): return
+    shutil.rmtree(tdata_path, ignore_errors=True)
+
 def delete_session_file(username: str) -> None:
     session_file = Path(f"./session/{username}.session")
     if not session_file.exists(): return
     session_file.unlink()
-
 
 def safe_extract(file_path, extract_path):
     p = multiprocessing.Process(target=patoolib.extract_archive, args=(file_path, -1, extract_path))
